@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Printslip-report XML table-maker</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        #status {
+            color: green;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .error {
+            color: red;
+        }
+        #startom{
+            display:none;
+        }
+        #hode{
+            display:block;
+        }
+        #tabell{
+            display:none;
+        }
+    
+    </style>
+</head>
+<body><div id="hode">
+<center><u><h2>Printslip-report XML table-maker</h2></u></center>
+    <h2>Upload XML-file</h2>
+
+    <input type="file" id="xmlFileInput" accept=".xml" onchange="handleFileSelect(event)">
+    
+    <div id="status"></div>
+</div>
+<button id="startom" onclick="restart()">Restart</button>
+<div id="tabell">
+    <center><h2>Pick up from shelf list</h2></center>
+
+    <table id="dataTable">
+        <thead>
+            <tr><th>No.</th>
+                <th>Location</th>
+                <th>Call number</th>
+                <th>Title</th>
+                <th>Barcode</th>
+                <th>Request note</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+
+        </tbody>
+    </table>
+</div>
+    <script>
+        function handleFileSelect(event) {
+            document.getElementById('tabell').style.display = 'block';
+            document.getElementById('hode').style.display = 'none';
+            document.getElementById('startom').style.display ='block';
+
+            const fileInput = event.target;
+            const file = fileInput.files[0];
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = ''; 
+
+            if (!file) {
+                statusDiv.textContent = 'Choose an XML-file';
+                statusDiv.classList.add('error');
+                return;
+            }
+
+     
+            const reader = new FileReader();
+
+       
+            reader.onload = function(e) {
+                const xmlText = e.target.result;
+                parseAndDisplayXML(xmlText);
+            };
+
+     
+            reader.onerror = function() {
+                statusDiv.textContent = 'Error reading file';
+                statusDiv.classList.add('error');
+            };
+
+ 
+            reader.readAsText(file);
+        }
+
+        function parseAndDisplayXML(xmlString) {
+            const parser = new DOMParser();
+    
+            const xmlDoc = parser.parseFromString(xmlString, "application/xml");
+
+ 
+            const errorNode = xmlDoc.querySelector("parsererror");
+            if (errorNode) {
+                document.getElementById('status').textContent = 'Failed to parse XML file: ' + errorNode.textContent;
+                document.getElementById('status').classList.add('error');
+                return;
+            }
+
+
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = ''; 
+
+            const requests = xmlDoc.getElementsByTagName("Request");
+            console.log(requests)
+
+            for (let i = 0; i < requests.length; i++) {
+                const request = requests[i];
+                const holding = request.getElementsByTagName("location")[0].textContent;
+                const tittel = request.getElementsByTagName("title")[0].textContent;
+                const ddk = request.getElementsByTagName("call_number")[0].textContent;
+                const dokid = request.getElementsByTagName("barcode")[0].textContent;
+                const note = request.getElementsByTagName("note")[0].textContent;
+                const nummer = i+1
+
+
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>${nummer}</td>
+                    <td>${holding}</td>
+                    <td>${ddk}</td>
+                    <td>${tittel}</td>
+                    <td>${dokid}</td>
+                    <td>${note}</td>
+                `;
+
+                tableBody.appendChild(newRow);
+            }
+            
+            document.getElementById('status').textContent = `Successfully loaded ${requests.length} requests.`;
+            document.getElementById('status').classList.remove('error');
+          
+        }
+             function restart() {
+  
+                    location.reload(); 
+
+                                }
+ 
+    </script>
+
+</body>
+</html>
