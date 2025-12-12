@@ -24,28 +24,18 @@
         }
         .error {
             color: red;
-        }
-        #restart{
-            display:none;
-        }
-        #hode{
-            display:block;
-        }
-        #tabell{
-            display:none;
-        }
     </style>
 </head>
-<body><div id="hode">
+<body>
 <center><u><h2>Printslip-report XML tabel-maker</h2></u></center>
     <h2>Last opp XML-fil</h2>
 
     <input type="file" id="xmlFileInput" accept=".xml" onchange="handleFileSelect(event)">
     
     <div id="status"></div>
-</div>
-<button id="restart" onclick="reset()">Restart</button>
-<div id="tabell">
+
+
+
     <center><h2>Pick up from shelf list</h2></center>
     <table id="dataTable">
         <thead>
@@ -58,10 +48,10 @@
             </tr>
         </thead>
         <tbody id="tableBody">
-            <!-- Data rows will be inserted here by JavaScript -->
+
         </tbody>
     </table>
-</div>
+
     <script>
         function handleFileSelect(event) {
             document.getElementById('tabell').style.display:'block';
@@ -79,31 +69,30 @@
                 return;
             }
 
-            // Use the HTML5 FileReader API to read the file content
+
             const reader = new FileReader();
 
-            // Define what happens once the file is loaded
+
             reader.onload = function(e) {
                 const xmlText = e.target.result;
                 parseAndDisplayXML(xmlText);
             };
 
-            // Define what happens if there is an error
+
             reader.onerror = function() {
                 statusDiv.textContent = 'Error reading the file';
                 statusDiv.classList.add('error');
             };
 
-            // Read the file as plain text
             reader.readAsText(file);
         }
 
         function parseAndDisplayXML(xmlString) {
             const parser = new DOMParser();
-            // Parse the text string into an XML DOM object
+
             const xmlDoc = parser.parseFromString(xmlString, "application/xml");
 
-            // Check for parsing errors
+ 
             const errorNode = xmlDoc.querySelector("parsererror");
             if (errorNode) {
                 document.getElementById('status').textContent = 'Error reading XML-file: ' + errorNode.textContent;
@@ -111,11 +100,11 @@
                 return;
             }
 
-            // Clear the existing table body
+  
             const tableBody = document.getElementById('tableBody');
             tableBody.innerHTML = ''; 
 
-            // Extract data using DOM methods (getElementsByTagName)
+
             const requests = xmlDoc.getElementsByTagName("Request");
             console.log(requests)
 
@@ -128,7 +117,7 @@
                 const note = request.getElementsByTagName("note")[0].textContent;
                 const nummer = i+1
 
-                // Create a new table row and cells
+
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `
                     <td>${nummer}</td>
@@ -148,4 +137,5 @@
     </script>
 
 </body>
+
 </html>
