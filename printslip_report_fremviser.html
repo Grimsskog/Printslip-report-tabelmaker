@@ -37,14 +37,14 @@
     
     </style>
 </head>
-<body><div id="hode">
-<center><u><h2>Printslip-report XML behandler</h2></u></center>
-    <h2>Last opp XML-fil</h2>
-
-    <input type="file" id="xmlFileInput" accept=".xml" onchange="handleFileSelect(event)">
-    
+<body><center><div id="hode">
+<center><u><h2>HiMolde Printslip-report XML behandler</h2></u></center><br><br>
+    <h3>  
+<label for="xmlFileInput">Last opp XML-fil:  </label>
+    <input type="file" id="xmlFileInput" accept=".xml" onchange="handleFileSelect(event)" >
+    </h3>
     <div id="status"></div>
-</div>
+</div></center>
 <button id="startom" onclick="restart()">Start på nytt</button>
 <div id="tabell">
     <center><h2>Hente-på-hylla liste</h2></center>
@@ -52,11 +52,12 @@
     <table id="dataTable">
         <thead>
             <tr><th>Nr</th>
-                <th>Holding</th>
+                <th>Location</th>
                 <th>Dewey</th>
                 <th>Tittel</th>
                 <th>DocID</th>
-                <th>Request note/beskjed</th>
+                <th>Skal til</th>
+                <th>Beskjed</th>
             </tr>
         </thead>
         <tbody id="tableBody">
@@ -122,26 +123,43 @@
 
             for (let i = 0; i < requests.length; i++) {
                 const request = requests[i];
+                const tilBib = request.getElementsByTagName("pickup_at")[0].textContent;
+                const fraBib = request.getElementsByTagName("library")[0].textContent;
                 const holding = request.getElementsByTagName("location")[0].textContent;
                 const tittel = request.getElementsByTagName("title")[0].textContent;
                 const ddk = request.getElementsByTagName("call_number")[0].textContent;
                 const dokid = request.getElementsByTagName("barcode")[0].textContent;
                 const note = request.getElementsByTagName("note")[0].textContent;
                 const nummer = i+1
+                const plass = holding.substring(0,holding.indexOf("("));
 
 
-                const newRow = document.createElement('tr');
+             if (tilBib == fraBib) {
+                    const newRow = document.createElement('tr');
                 newRow.innerHTML = `
                     <td>${nummer}</td>
-                    <td>${holding}</td>
+                    <td>${plass}</td>
                     <td>${ddk}</td>
-                    <td>${tittel}</td>
+                    <td>${tittel+", "+aar}</td>
                     <td>${dokid}</td>
+                    <td>Hold-shelf</td>
                     <td>${note}</td>
                 `;
-
                 tableBody.appendChild(newRow);
-            }
+                } else {
+                    const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>${nummer}</td>
+                    <td>${plass}</td>
+                    <td>${ddk}</td>
+                    <td>${tittel+", "+aar}</td>
+                    <td>${dokid}</td>
+                    <td>${tilBib}</td>
+                    <td>${note}</td>
+                `;
+                tableBody.appendChild(newRow);
+                };
+
             
             document.getElementById('status').textContent = `Har klart å laste ${requests.length} request'er.`;
             document.getElementById('status').classList.remove('error');
@@ -156,4 +174,5 @@
     </script>
 
 </body>
+
 </html>
